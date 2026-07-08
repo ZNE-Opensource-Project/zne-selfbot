@@ -1,2 +1,2 @@
-# zne-selfbot
-ZNE Selfbot V1
+# ZNE Selfbot
+ZNE Selfbot V2
