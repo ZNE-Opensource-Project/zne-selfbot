@@ -359,15 +359,7 @@ class AnimationCommands(commands.Cog):
             "(no .txt extension needed)"
         )
 
-        try:
-            embed = discord.Embed(
-                title="Custom Animation Help",
-                description=help_text,
-                color=0x00FF00
-            )
-            await ctx.send(embed=embed)
-        except discord.Forbidden:
-            await ctx.send(help_text)
+        await ctx.send(help_text)
 
     @commands.command()
     async def customanimations(self, ctx: commands.Context):

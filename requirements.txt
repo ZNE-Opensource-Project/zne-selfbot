@@ -1,3 +1,5 @@
 discord.py-self
 aiosqlite
 rich
+PyCryptodome
+flask

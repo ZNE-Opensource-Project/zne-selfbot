@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZNE Self - Commands</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            padding: 24px;
+            position: relative;
+            color: #e0e0e0;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 40%),
+                        radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .page {
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .title {
+            font-size: 26px;
+            font-weight: 700;
+            text-transform: lowercase;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .nav {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #aaa;
+            background: linear-gradient(145deg, #2a2a3a 0%, #1e1e2e 100%);
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            text-transform: capitalize;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        .nav a:hover {
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .nav a.active {
+            color: #fff;
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .category {
+            background: linear-gradient(145deg, #2a2a3a 0%, #1e1e2e 100%);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 18px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .category-title {
+            color: #8b5cf6;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            color: #c7d2fe;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+        }
+
+        .chip:hover {
+            background: rgba(99, 102, 241, 0.22);
+            transform: translateY(-1px);
+        }
+
+        .empty {
+            text-align: center;
+            color: #666;
+            padding: 60px 20px;
+            font-size: 15px;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 20px;
+        }
+
+        .overlay.show {
+            display: flex;
+        }
+
+        .popup {
+            background: linear-gradient(145deg, #2a2a3a 0%, #1e1e2e 100%);
+            border-radius: 16px;
+            padding: 24px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 22px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .popup-close:hover {
+            color: #fff;
+        }
+
+        .popup-name {
+            color: #c7d2fe;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 20px;
+            margin-bottom: 4px;
+            padding-right: 24px;
+        }
+
+        .popup-cat {
+            color: #8b5cf6;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 18px;
+        }
+
+        .field {
+            margin-bottom: 14px;
+        }
+
+        .field-label {
+            color: #888;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .field-value {
+            color: #d0d0d0;
+            font-size: 13px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 10px 12px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .execute-btn {
+            width: 100%;
+            margin-top: 8px;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+
+        .execute-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .execute-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .execute-status {
+            margin-top: 12px;
+            font-size: 13px;
+            text-align: center;
+            min-height: 18px;
+        }
+
+        .execute-status.ok {
+            color: #2ecc71;
+        }
+
+        .execute-status.err {
+            color: #e74c3c;
+        }
+
+        .args-input {
+            width: 100%;
+            margin-top: 8px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            color: #d0d0d0;
+            font-size: 13px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .args-input:focus {
+            border-color: rgba(99, 102, 241, 0.55);
+        }
+
+        .args-input::placeholder {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <div class="title">zne self - commands</div>
+            <div class="nav">
+                <a href="/">Dashboard</a>
+                <a href="/commands" class="active">Commands</a>
+            </div>
+        </div>
+
+        {% if command_groups %}
+            {% for category, names in command_groups.items() %}
+                <div class="category">
+                    <div class="category-title">{{ category | replace("Commands", "") }}</div>
+                    <div class="chips">
+                        {% for name in names %}
+                            <span class="chip" data-command="{{ name }}">{{ name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty">No commands are loaded yet. Start the bot to populate this list.</div>
+        {% endif %}
+    </div>
+
+    <div class="overlay" id="overlay">
+        <div class="popup">
+            <button class="popup-close" id="popupClose">&times;</button>
+            <div class="popup-name" id="popupName"></div>
+            <div class="popup-cat" id="popupCat"></div>
+
+            <div class="field">
+                <div class="field-label">Usage</div>
+                <div class="field-value" id="popupUsage"></div>
+            </div>
+            <div class="field">
+                <div class="field-label">Arguments</div>
+                <div class="field-value" id="popupArgs"></div>
+            </div>
+            <div class="field">
+                <div class="field-label">Example</div>
+                <div class="field-value" id="popupExample"></div>
+            </div>
+
+            <div class="field">
+                <div class="field-label">Arguments (editable)</div>
+                <input type="text" class="args-input" id="popupArgsInput" placeholder="Type the command arguments here...">
+            </div>
+
+            <button class="execute-btn" id="executeBtn">Execute Command</button>
+            <div class="execute-status" id="executeStatus"></div>
+        </div>
+    </div>
+
+    <script>
+        const overlay = document.getElementById('overlay');
+        const popupName = document.getElementById('popupName');
+        const popupCat = document.getElementById('popupCat');
+        const popupUsage = document.getElementById('popupUsage');
+        const popupArgs = document.getElementById('popupArgs');
+        const popupExample = document.getElementById('popupExample');
+        const popupArgsInput = document.getElementById('popupArgsInput');
+        const executeBtn = document.getElementById('executeBtn');
+        const executeStatus = document.getElementById('executeStatus');
+        const popupClose = document.getElementById('popupClose');
+
+        let currentCommand = null;
+
+        function openPopup(name) {
+            currentCommand = name;
+            popupName.textContent = name;
+            popupCat.textContent = '';
+            popupUsage.textContent = 'Loading...';
+            popupArgs.textContent = '';
+            popupExample.textContent = '';
+            popupArgsInput.value = '';
+            executeStatus.textContent = '';
+            executeStatus.className = 'execute-status';
+            executeBtn.disabled = false;
+            overlay.classList.add('show');
+
+            fetch('/api/command/' + encodeURIComponent(name))
+                .then(r => r.json())
+                .then(data => {
+                    popupCat.textContent = data.category || 'No Category';
+                    popupUsage.textContent = data.usage || 'N/A';
+                    popupArgs.textContent = data.args || 'None';
+                    popupExample.textContent = data.example || 'N/A';
+                    if (data.example && typeof data.example === 'string') {
+                        const prefix = (window.PREFIX || '.');
+                        let ex = data.example.trim();
+                        if (ex.startsWith(prefix)) ex = ex.slice(prefix.length);
+                        const parts = ex.split(/\s+/);
+                        parts.shift();
+                        popupArgsInput.value = parts.join(' ');
+                    }
+                    if (data.exists === false) {
+                        executeBtn.disabled = true;
+                        executeStatus.textContent = 'Command not loaded by the bot.';
+                        executeStatus.className = 'execute-status err';
+                    }
+                })
+                .catch(() => {
+                    popupUsage.textContent = 'N/A';
+                    popupArgs.textContent = 'None';
+                    popupExample.textContent = 'N/A';
+                });
+        }
+
+        function closePopup() {
+            overlay.classList.remove('show');
+            currentCommand = null;
+        }
+
+        popupClose.addEventListener('click', closePopup);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closePopup();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closePopup();
+        });
+
+        document.querySelectorAll('.chip').forEach(chip => {
+            chip.addEventListener('click', () => openPopup(chip.dataset.command));
+        });
+
+        executeBtn.addEventListener('click', () => {
+            if (!currentCommand) return;
+            executeBtn.disabled = true;
+            executeStatus.textContent = 'Executing...';
+            executeStatus.className = 'execute-status';
+
+            fetch('/api/execute', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    command: currentCommand,
+                    args: popupArgsInput.value
+                })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok) {
+                        executeStatus.textContent = 'Executed in TEST group chat.';
+                        executeStatus.className = 'execute-status ok';
+                    } else {
+                        executeStatus.textContent = data.error || 'Failed to execute.';
+                        executeStatus.className = 'execute-status err';
+                    }
+                    executeBtn.disabled = false;
+                })
+                .catch(err => {
+                    executeStatus.textContent = 'Request failed: ' + err;
+                    executeStatus.className = 'execute-status err';
+                    executeBtn.disabled = false;
+                });
+        });
+    </script>
+</body>
+</html>

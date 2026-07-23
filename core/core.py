@@ -2,6 +2,7 @@ import asyncio
 import importlib.util
 import os
 import sys
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -19,7 +20,9 @@ except ImportError:
     pass
 
 from .database import Database
-from .config import BOT
+from config import BOT
+
+command_count = 0
 
 
 def clear_terminal() -> None:
@@ -123,17 +126,40 @@ async def on_ready() -> None:
     print(f"Logged in as {bot.user} | {bot.user.id}".center(80))
     print(f"Prefix: {BOT.PREFIX} | Type: {BOT.BOT_TYPE}".center(80))
     print(f"Guilds: {len(bot.guilds)} | Commands: {len(bot.commands)}".center(80))
+    print("Web UI running at http://127.0.0.1:5000".center(80))
+
+    try:
+        from webui import update_stats
+        avatar_url = None
+        if bot.user.avatar:
+            avatar_url = bot.user.avatar.url
+        elif bot.user.display_avatar:
+            avatar_url = bot.user.display_avatar.url
+        update_stats(
+            username=str(bot.user),
+            avatar_url=avatar_url,
+            guilds=len(bot.guilds),
+            commands=len(bot.commands),
+            start_time=time.time(),
+        )
+    except Exception:
+        pass
 
 
-@bot.event
-async def on_message(message: discord.Message) -> None:
-    if message.author == bot.user:
-        if BOT.BOT_TYPE != "self":
-            return
-
-    await log_message_to_db(message)
-
-    await bot.process_commands(message)
+@bot.before_invoke
+async def track_command(ctx: commands.Context) -> None:
+    global command_count
+    command_count += 1
+    try:
+        from webui import update_stats
+        update_stats(commands=command_count)
+    except Exception:
+        pass
+    try:
+        command_name = ctx.command.qualified_name if ctx.command else "unknown"
+        print(f"[ INFO ] {ctx.author} executed {command_name} in {ctx.guild.name if ctx.guild else 'DM'}")
+    except Exception:
+        pass
 
 
 @bot.event
@@ -146,6 +172,17 @@ async def on_command_error(ctx: commands.Context, error: Exception) -> None:
         console.print(error_text, style="bold red")
     else:
         print(f"\033[91m{error_text}\033[0m")
+
+
+@bot.event
+async def on_message(message: discord.Message) -> None:
+    if message.author == bot.user:
+        if BOT.BOT_TYPE != "self":
+            return
+
+    await log_message_to_db(message)
+
+    await bot.process_commands(message)
 
 
 async def log_message_to_db(message: discord.Message) -> None:
